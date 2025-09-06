@@ -5,6 +5,7 @@ import axios from 'axios';
 import { URLSearchParams } from 'url';
 import * as jwt from 'jsonwebtoken';
 import jwkToPem from 'jwk-to-pem';
+import { PrismaServise } from 'src/prisma/prisma.service';
 
 interface LineIdTokenPayload {
   sub: string;
@@ -18,6 +19,7 @@ export class AuthService {
   constructor(
     private readonly http: HttpService,
     private readonly jwtService: JwtService,
+    private readonly prisma: PrismaServise,
   ) {}
 
   getLoginUrl(): string {
@@ -53,6 +55,27 @@ export class AuthService {
 
       const { id_token } = tokenRes.data;
       const userInfo = await this.verifyIdToken(id_token);
+
+      //DBにuser情報を登録
+      let user = await this.prisma.smoking_Log.findUnique({
+        where: { user_id: userInfo.sub },
+      });
+      if (!user) {
+        user = await this.prisma.smoking_Log.create({
+          data: {
+            user_id: userInfo.sub,
+            user_name: userInfo.name,
+            created_at: new Date(),
+          },
+        });
+      } else {
+        user = await this.prisma.smoking_Log.update({
+          where: { user_id: userInfo.sub },
+          data: {
+            user_name: userInfo.name,
+          },
+        });
+      };
 
       const appToken = this.jwtService.sign({
         sub: userInfo.sub,
