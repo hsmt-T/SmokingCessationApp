@@ -9,6 +9,6 @@ async function bootstrap() {
   app.enableCors();
 
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
-  console.log(`サーバー起動: http://localhost:${process.env.PORT ?? 3000}`);
+  console.log(`サーバー起動: http://localhost:${process.env.PORT ?? 3000}   `);
 }
 bootstrap();
