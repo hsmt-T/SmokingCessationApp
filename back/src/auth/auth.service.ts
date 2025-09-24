@@ -82,6 +82,8 @@ export class AuthService {
         name: userInfo.name,
       });
 
+      console.log('JWT発行:', appToken);
+
       return { user: userInfo, jwt: appToken };
     } catch (e) {
       console.error('LINE login error:', e.response?.data || e.message || e);
