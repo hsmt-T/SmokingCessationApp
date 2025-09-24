@@ -16,6 +16,7 @@ export class AuthController {
   @Redirect()
   async callback(@Query('code') code: string,) {
     const result = await this.authService.handleCallback(code);
+    console.log(code)
 
     // DeepLink にリダイレクト
     const jwt = result.jwt;
