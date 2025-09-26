@@ -5,7 +5,7 @@ import axios from 'axios';
 import { URLSearchParams } from 'url';
 import * as jwt from 'jsonwebtoken';
 import jwkToPem from 'jwk-to-pem';
-import { PrismaServise } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 interface LineIdTokenPayload {
   sub: string;
@@ -19,7 +19,7 @@ export class AuthService {
   constructor(
     private readonly http: HttpService,
     private readonly jwtService: JwtService,
-    private readonly prisma: PrismaServise,
+    private readonly prisma: PrismaService,
   ) {}
 
   getLoginUrl(): string {
