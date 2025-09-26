@@ -1,0 +1,88 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+
+@Injectable()
+export class LogService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  private async Average(user_id: string): Promise<number | null> {
+    const log = await this.prisma.smoking_Log.findUnique({
+      where: {user_id},
+      select: {
+        smoke_totalCount: true,
+        created_at: true,
+      },
+    });
+
+    if(!log) return null;
+
+    const startDate = new Date(log.created_at!);
+    const today = new Date();
+    const diffTime = today.getTime() - startDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+    return log.smoke_totalCount! / diffDays;
+  }
+
+  async getPredictionLog(user_id: string) {
+    const log = await this.prisma.smoking_Log.findUnique({
+      where: { user_id },
+      select: {
+        smoke_totalCount: true,
+        smoke_price: true,
+      },
+    });
+
+    if (!log) return null;
+
+    //計算
+
+    const average = await this.Average(user_id);
+    const threeMonthsPredictionSmoke = average ? Math.round(average * 30 * 3) : null;
+    const pricePerCigarette = log.smoke_price! /20;
+    
+
+    let boxNum = Math.floor(log.smoke_totalCount! / 20);
+    const remainder = log.smoke_totalCount! % 20;
+
+    if (remainder !== 0) {
+      boxNum++;
+    }
+
+    //結果
+    const threeMonthsPredictionPrice = threeMonthsPredictionSmoke !== null
+      ? Math.round(threeMonthsPredictionSmoke * pricePerCigarette)
+      : null;
+    const usePrice = boxNum * log.smoke_price!;
+    const lifespan = log.smoke_totalCount! * 11;
+    const useTime = log.smoke_totalCount! * 5;
+    return {
+      threeMonthsPredictionPrice,
+      usePrice,
+      totalSmoke: log.smoke_totalCount,
+      lifespan,
+      useTime
+    };
+  }
+
+  async topLog (user_id: string) {
+    const topLog = await this.prisma.smoking_Log.findUnique({
+      where: {user_id},
+      select: {
+        smoke_todayCount: true,
+        smoke_totalCount: true,
+        created_at: true
+      }
+    });
+
+    if (!topLog) return null;
+
+    const average = await this.Average(user_id)
+
+    return {
+      today: topLog.smoke_todayCount,
+      average: Math.floor(average!),
+    }
+  }
+  
+}

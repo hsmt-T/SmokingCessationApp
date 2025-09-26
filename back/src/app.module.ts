@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
+import { LogModule } from './log/log.module';
 
 @Module({
   imports: [
@@ -12,7 +13,8 @@ import { UserModule } from './user/user.module';
     }),
     PrismaModule,
     AuthModule,
-    UserModule, // ← ここで認証モジュールを読み込み
+    UserModule,
+    LogModule, 
   ],
 })
 export class AppModule {}
