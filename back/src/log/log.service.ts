@@ -1,8 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class LogService {
+
+  private readonly logger = new Logger(LogService.name)
   constructor(private readonly prisma: PrismaService) {}
 
   private async Average(user_id: string): Promise<number | null> {
@@ -82,6 +85,35 @@ export class LogService {
     return {
       today: topLog.smoke_todayCount,
       average: Math.floor(average!),
+    }
+  }
+
+  async count (user_id) {
+    const countIncrement = await this.prisma.smoking_Log.update({
+      where: {user_id},
+      data:{
+        smoke_totalCount: {increment: 1},
+        smoke_todayCount: {increment: 1}
+      },
+      select: {
+        user_id: true,
+        smoke_totalCount: true,
+        smoke_todayCount: true,
+      }
+    })
+
+    return { countIncrement, message: "total・todayを更新しました" };
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async resetTodayCount() {
+    try {
+      await this.prisma.smoking_Log.updateMany({
+        data: { smoke_todayCount : 0 },
+      });
+      this.logger.log('全ユーザーのtodayCountをリセットしました')
+    } catch (error) {
+      this.logger.error('todayCountのリセットに失敗', error.stack)
     }
   }
   

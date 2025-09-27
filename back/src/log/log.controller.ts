@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards,  Req,InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, UseGuards,  Req,InternalServerErrorException, Post } from '@nestjs/common';
 import { LogService } from './log.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
 
@@ -27,6 +27,18 @@ export class LogController {
     } catch (error) {
       console.log("TOPLOG取得エラー", error)
       throw new InternalServerErrorException('TOPLOG取得に失敗しました');
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('')
+  async countUp (@Req() req: any) {
+    try {
+      const user_id = req.user?.user_id;
+      return await this.logService.count(user_id);
+    } catch (error) {
+      console.log("喫煙数記録エラー", error)
+      throw new InternalServerErrorException('喫煙数記録に失敗しました');
     }
   }
 }
