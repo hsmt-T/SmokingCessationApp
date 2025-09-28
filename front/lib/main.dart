@@ -10,7 +10,7 @@ void main() async {
 
   runApp(
     MyApp(
-      initialScreen: jwt != null ? const TopScreen() : const LoginScreen(),
+      initialScreen: jwt != null ?  TopScreen() : const LoginScreen(),
     ),
   );
 }
