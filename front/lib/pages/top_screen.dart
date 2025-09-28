@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import './record_screen.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 //開発中のみ
-import 'package:shared_preferences/shared_preferences.dart';
-import './login_screen.dart'; 
+import './login_screen.dart';
 //開発中のみ
 
 class TopScreen extends StatefulWidget {
@@ -18,7 +20,7 @@ class _TopScreenState extends State<TopScreen> {
 
   static final List<Widget> _widgetOptions = <Widget>[
     const RecordPage(),
-    const TopPage(),
+    TopPage(),
     const Center(child: Text('2')),
   ];
 
@@ -31,11 +33,14 @@ class _TopScreenState extends State<TopScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _widgetOptions.elementAt(_selectIndex),
+      body:  _widgetOptions[_selectIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.edit_note), label: '記録'),
-          BottomNavigationBarItem(icon: Icon(Icons.smoking_rooms),label: 'TOP',),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.smoking_rooms),
+            label: 'TOP',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.maps_ugc), label: '共有'),
         ],
         currentIndex: _selectIndex,
@@ -45,7 +50,11 @@ class _TopScreenState extends State<TopScreen> {
         unselectedItemColor: Colors.grey[600],
         type: BottomNavigationBarType.fixed,
 
-        selectedLabelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF742424)),
+        selectedLabelStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF742424),
+        ),
         unselectedLabelStyle: const TextStyle(fontSize: 13),
         iconSize: 30,
       ),
@@ -53,16 +62,85 @@ class _TopScreenState extends State<TopScreen> {
   }
 }
 
-class TopPage extends StatelessWidget {
+class TopPage extends StatefulWidget {
   const TopPage({super.key});
 
   @override
+  State<TopPage> createState() => _TopPageState();
+}
+
+class _TopPageState extends State<TopPage> {
+  int today = 0;
+  int average = 0;
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTopLog();
+  }
+
+  Future<void> _fetchTopLog() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jwt = prefs.getString('jwt');
+
+    if (jwt == null) return;
+
+    final res = await http.get(
+      Uri.parse('http://10.0.2.2:3000/log/top'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwt',
+      },
+    );
+
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      setState(() {
+        today = data['today'] ?? 0;
+        average = data['average'] ?? 0;
+        loading = false;
+      });
+    } else {
+      setState(() => loading = false);
+    }
+  }
+
+  Future<void> _smoke() async {
+    print('ボタン押された');
+    setState(() => loading = true); // ローディング開始
+    final prefs = await SharedPreferences.getInstance();
+    final jwt = prefs.getString('jwt');
+    if (jwt == null) return;
+
+    final res = await http.post(
+      Uri.parse('http://10.0.2.2:3000/log'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwt',
+      },
+    );
+
+    if (res.statusCode == 201 | 200) {
+      final data = jsonDecode(res.body);
+      setState(() {
+        today = data['today'] ?? today;
+        loading = false;
+      });
+    }
+    setState(() => loading = false); // ローディング終了
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
     return Center(
       child: Column(
         children: [
           SizedBox(height: 150),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
@@ -77,7 +155,7 @@ class TopPage extends StatelessWidget {
               SizedBox(width: 25),
 
               Text(
-                '6',
+                '$today',
                 style: TextStyle(
                   color: Color.fromARGB(255, 255, 255, 255),
                   fontSize: 60,
@@ -85,7 +163,7 @@ class TopPage extends StatelessWidget {
               ),
             ],
           ),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
@@ -106,7 +184,7 @@ class TopPage extends StatelessWidget {
               SizedBox(width: 20),
 
               Text(
-                '7',
+                '$average',
                 style: TextStyle(color: Color(0xFFE74545), fontSize: 23),
               ),
             ],
@@ -116,7 +194,7 @@ class TopPage extends StatelessWidget {
           const SizedBox(height: 110),
           SizedBox(
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: _smoke,
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Color(0xFF742424)),
                 shape: MaterialStateProperty.all(
@@ -145,10 +223,10 @@ class TopPage extends StatelessWidget {
                 );
               }
             },
-          child: Text("ログアウト（開発用）"),
+            child: Text("ログアウト（開発用）"),
           ),
+
           //開発中のみ
-          
         ],
       ),
     );

@@ -81,7 +81,7 @@ export class LogService {
     if (!topLog) return null;
 
     const average = await this.Average(user_id)
-
+    console.log('topLog成功');
     return {
       today: topLog.smoke_todayCount,
       average: Math.floor(average!),
@@ -102,7 +102,8 @@ export class LogService {
       }
     })
 
-    return { countIncrement, message: "total・todayを更新しました" };
+    console.log('count成功');
+    return { today: countIncrement.smoke_todayCount };
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
