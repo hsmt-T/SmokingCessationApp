@@ -36,7 +36,10 @@ export class LogService {
       },
     });
 
-    if (!log) return null;
+    if (!log) {
+      console.warn(`ユーザー ${user_id} の喫煙ログが見つかりません`);
+      return null;
+    } 
 
     //計算
 
@@ -56,9 +59,10 @@ export class LogService {
     const threeMonthsPredictionPrice = threeMonthsPredictionSmoke !== null
       ? Math.round(threeMonthsPredictionSmoke * pricePerCigarette)
       : null;
-    const usePrice = boxNum * log.smoke_price!;
+    const usePrice = Number(((boxNum * log.smoke_price!) / 1000).toFixed(1));
     const lifespan = log.smoke_totalCount! * 11;
     const useTime = log.smoke_totalCount! * 5;
+    console.log('recordLog成功');
     return {
       threeMonthsPredictionPrice,
       usePrice,
