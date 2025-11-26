@@ -17,3 +17,9 @@ model smoking_Log {
   smoke_price      Int?      @default(550) @db.SmallInt
   smoke_todayCount Int?      @default(0)
 }
+
+model items {
+  item_id          Int    @id @default(autoincrement())
+  item_name        String
+  item_price       Int
+}
