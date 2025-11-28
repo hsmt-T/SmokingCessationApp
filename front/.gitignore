@@ -18,6 +18,11 @@ migrate_working_dir/
 *.iws
 .idea/
 
+# Flutter build artifacts (特に web の自動生成HTML群) を言語集計から除外
+build/** linguist-generated=true
+web/** linguist-generated=true
+
+
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
