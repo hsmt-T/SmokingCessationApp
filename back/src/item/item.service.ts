@@ -17,7 +17,8 @@ export class ItemService {
     },
   });
 
-  if (!item) return "";
-  return item.item_name;
+  if (!item) return { buyItemName: null };
+
+  return { buyItemName: item.item_name};
   }
 }
