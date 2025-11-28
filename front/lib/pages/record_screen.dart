@@ -24,28 +24,54 @@ class _RecordPageState extends State<RecordPage> {
   }
 
   Future<void> fetchRecordData() async {
-    try {
-      final url = Uri.parse('http://10.0.2.2:3000/log');
-      final prefs = await SharedPreferences.getInstance();
-      final jwt = prefs.getString('jwt');
-      if (jwt == null) return;
-      final res = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $jwt', 
-        },
-      );
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final jwt = prefs.getString('jwt');
+    if (jwt == null) return;
 
-      if (res.statusCode == 200 ) {
-        final data = jsonDecode(res.body);
-        setState(() {
-          recordData = data;
-          isLoading = false;
-        });
-      } else {
-        print('API エラー: ${res.statusCode}');
-      }
+    final logUrl = Uri.parse('http://10.0.2.2:3000/log');
+    final logRes = await http.get(
+      logUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $jwt',
+      },
+    );
+
+    if (logRes.statusCode != 200) {
+      print('log API error: ${logRes.statusCode}');
+      return;
+    }
+
+    final logData = jsonDecode(logRes.body);
+    final threeMonthsPredictionPrice = logData['threeMonthsPredictionPrice'];
+
+    final itemUrl = Uri.parse('http://10.0.2.2:3000/item');
+    final itemRes = await http.post(
+      itemUrl,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "threeMonthsPredictionPrice": threeMonthsPredictionPrice,
+      }),
+    );
+
+    if (itemRes.statusCode != 201) {
+      print('item API error: ${itemRes.statusCode}');
+      return;
+    }
+
+    final itemData = jsonDecode(itemRes.body);
+
+    setState(() {
+      recordData = {
+        ...logData,
+        "buyItemName": itemData["buyItemName"],
+      };
+      isLoading = false;
+    });
+
     } catch (e) {
       print('record画面 API接続エラー: $e');
       setState(() {
@@ -53,6 +79,7 @@ class _RecordPageState extends State<RecordPage> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +97,8 @@ class _RecordPageState extends State<RecordPage> {
     final totalSmoke = record['totalSmoke'] ?? 'エラー';
     final lifespan = record['lifespan'] ?? 'エラー';
     final useTime = record['useTime'] ?? 'エラー';
+    final buyItemName = record['buyItemName'] ?? '???';
+
 
     return Scaffold(
       body: Center(
@@ -114,7 +143,7 @@ class _RecordPageState extends State<RecordPage> {
             ),
 
             SizedBox(height: 30),
-            const BuyCard(),
+            BuyCard(buyItemName: buyItemName),
             SizedBox(height: 30),
             const Text(
               "今までの記録",

@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
 
 class BuyCard extends StatelessWidget {
-  const BuyCard({super.key});
+  final String buyItemName;
+  const BuyCard({super.key, required this.buyItemName});
 
   @override
   Widget build(BuildContext context) {
-
-    const buyItemName = '高性能掃除機';
-
     final textPainter = TextPainter(
-      text: const TextSpan(
+      text: TextSpan(
         text: buyItemName,
-        style: TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
       ),
       maxLines: 1,
       textDirection: TextDirection.ltr,
@@ -37,21 +32,27 @@ class BuyCard extends StatelessWidget {
             TextSpan(
               children: [
                 TextSpan(
-                  text:  '半年',
+                  text: '半年',
                   style: TextStyle(
-                    color: Color(0xFF666666), fontSize: 15,fontWeight: FontWeight.bold,
+                    color: Color(0xFF666666),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 TextSpan(
-                  text:  '禁煙',
+                  text: '禁煙',
                   style: TextStyle(
-                    color: Color(0xFFE74545), fontSize: 15,fontWeight: FontWeight.bold,
+                    color: Color(0xFFE74545),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 TextSpan(
-                  text:  'したら買えるもの',
+                  text: 'したら買えるもの',
                   style: TextStyle(
-                    color: Color(0xFF666666), fontSize: 15,fontWeight: FontWeight.bold,
+                    color: Color(0xFF666666),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -73,7 +74,11 @@ class BuyCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 2),
-                  Container(width: textWidth + 25, height: 2, color: Color(0xFF742424)),
+                  Container(
+                    width: textWidth + 25,
+                    height: 2,
+                    color: Color(0xFF742424),
+                  ),
                 ],
               ),
               SizedBox(width: 15),

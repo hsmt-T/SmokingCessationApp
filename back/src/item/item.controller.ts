@@ -5,10 +5,6 @@ import { FindItemDto } from './dto/item.dto';
 @Controller('item')
 export class ItemController {
   constructor(private readonly itemService: ItemService) {}
-  // @Get()
-  // findAll() {
-  //   return this.itemService.findAll();
-  // }
 
   @Post()
   async findOne(@Body() body: FindItemDto) {
