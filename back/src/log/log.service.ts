@@ -43,13 +43,20 @@ export class LogService {
 
     //計算
 
+    //1box
+    const box = 20;
+    //吸ってる時間
+    const smokingTime = 4;
+    //寿命
+    const lifeTime = 11;
+
     const average = await this.Average(user_id);
     const threeMonthsPredictionSmoke = average ? Math.round(average * 30 * 3) : null;
-    const pricePerCigarette = log.smoke_price! /20;
+    const pricePerCigarette = log.smoke_price! /box;
     
 
-    let boxNum = Math.floor(log.smoke_totalCount! / 20);
-    const remainder = log.smoke_totalCount! % 20;
+    let boxNum = Math.floor(log.smoke_totalCount! / box);
+    const remainder = log.smoke_totalCount! % box;
 
     if (remainder !== 0) {
       boxNum++;
@@ -60,8 +67,8 @@ export class LogService {
       ? Math.round(threeMonthsPredictionSmoke * pricePerCigarette)
       : null;
     const usePrice = Number(((boxNum * log.smoke_price!) / 1000).toFixed(1));
-    const lifespan = log.smoke_totalCount! * 11;
-    const useTime = log.smoke_totalCount! * 5;
+    const lifespan = log.smoke_totalCount! * lifeTime;
+    const useTime = log.smoke_totalCount! * smokingTime;
     console.log('recordLog成功');
     return {
       threeMonthsPredictionPrice,

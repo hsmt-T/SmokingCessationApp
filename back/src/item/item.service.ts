@@ -5,10 +5,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class ItemService {
   constructor (private readonly prisma : PrismaService) {}
 
-  // findAll() {
-  //   return this.prisma.items.findMany()
-  // }
-
   async findOne(threeMonthsPredictionPrice: number) {
   const item = await this.prisma.items.findFirst({
     where: {
@@ -23,6 +19,5 @@ export class ItemService {
 
   if (!item) return "";
   return item.item_name;
-}
-
+  }
 }
